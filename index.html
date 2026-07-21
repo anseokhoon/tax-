@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KB 프리미엄 달러평생소득변액연금 시뮬레이터</title>
+    
+    <!-- 폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 아이콘 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    colors: {
+                        kb: {
+                            yellow: '#FFCC00',
+                            gold: '#D4AF37',
+                            black: '#1A1A1A',
+                            dark: '#252525',
+                            panel: '#2A2A2A',
+                            border: '#3A3A3A',
+                            muted: '#9CA3AF',
+                            danger: '#EF4444'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #151515;
+            color: #F9FAFB;
+            background-image: radial-gradient(circle at 80% 0%, rgba(255, 204, 0, 0.05) 0%, transparent 50%);
+        }
+
+        /* 커스텀 슬라이더 */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            margin: 10px 0;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: #FFCC00;
+            cursor: pointer;
+            margin-top: -8px;
+            border: 3px solid #252525;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        /* 인풋 기본 스타일 제거 */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .pulse-btn {
+            animation: pulse-gold 2s infinite;
+        }
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 204, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); }
+        }
+
+        /* 프로그레스 바 애니메이션 */
+        .ledger-segment {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-kb-yellow selection:text-kb-black antialiased">
+
+    <!-- 헤더 -->
+    <header class="bg-kb-black/90 backdrop-blur-md border-b border-kb-yellow/50 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-kb-yellow text-kb-black rounded-lg flex items-center justify-center font-bold text-xl">
+                    <i class="fa-solid fa-gem"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold leading-tight tracking-tight">KB Wealth Management</h1>
+                    <p class="text-[10px] text-kb-yellow font-mono uppercase tracking-widest">Premium Simulator</p>
+                </div>
+            </div>
+            <a href="https://booking.allbaro.workers.dev/" target="_blank" class="hidden sm:flex items-center gap-2 bg-white text-kb-black px-4 py-1.5 rounded-full text-sm font-bold hover:bg-kb-yellow transition-colors shadow-[0_0_15px_rgba(255,204,0,0.3)]">
+                <i class="fa-solid fa-calendar-check"></i> VIP 상담예약
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl mx-auto px-4 py-8 w-full">
+        
+        <!-- 타이틀 섹션 -->
+        <div class="mb-10 text-center sm:text-left pt-4">
+            <div class="inline-flex items-center gap-2 text-kb-yellow font-mono text-xs mb-3 border border-kb-yellow/30 bg-kb-yellow/10 px-3 py-1 rounded-full">
+                <i class="fa-solid fa-dollar-sign"></i> 달러평생소득변액연금(월납)
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-black mb-4 leading-tight">
+                나만의 <span class="text-kb-yellow border-b-2 border-kb-yellow">달러 자본시스템</span>,<br class="hidden sm:block">
+                기간·수익률별로 가늠해보세요
+            </h2>
+            <p class="text-kb-muted text-sm sm:text-base max-w-2xl">
+                월 납입금액과 기대수익률을 조정하여, 시간의 흐름에 따라 나의 든든한 달러 자산이 어떻게 성장해 나가는지 직관적으로 확인해 보세요.
+            </p>
+        </div>
+
+        <!-- 환율 바 (FX Bar) -->
+        <div class="bg-kb-panel border border-kb-border rounded-2xl p-5 mb-8 shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center text-xs text-kb-muted font-mono uppercase tracking-wider mb-2 md:mb-0 w-full md:w-auto border-b md:border-b-0 border-kb-border pb-2 md:pb-0">
+                <i class="fa-solid fa-arrow-right-arrow-left mr-2"></i> FX 환율 설정
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto flex-grow justify-end">
+                <div class="flex flex-col w-full sm:w-auto">
+                    <label class="text-[10px] text-kb-muted font-mono mb-1">US 달러 (USD)</label>
+                    <div class="relative">
+                        <span class="absolute left-0 top-1 text-kb-yellow font-mono">$</span>
+                        <input id="fxUsd" type="text" inputmode="decimal" value="1,000" class="w-full sm:w-28 bg-transparent border-b border-gray-600 focus:border-kb-yellow text-white font-mono text-lg pl-4 pb-1 outline-none transition-colors">
+                    </div>
+                </div>
+                
+                <i class="fa-solid fa-right-long text-kb-border hidden sm:block"></i>
+                <i class="fa-solid fa-down-long text-kb-border sm:hidden my-1"></i>
+                
+                <div class="flex flex-col w-full sm:w-auto">
+                    <label class="text-[10px] text-kb-muted font-mono mb-1">원화 환산액 (KRW)</label>
+                    <div class="relative">
+                        <span class="absolute left-0 top-1 text-kb-yellow font-mono">₩</span>
+                        <input id="fxKrw" type="text" inputmode="decimal" value="1,400,000" class="w-full sm:w-36 bg-transparent border-b border-gray-600 focus:border-kb-yellow text-white font-mono text-lg pl-4 pb-1 outline-none transition-colors">
+                    </div>
+                </div>
+
+                <div class="h-8 w-px bg-kb-border hidden md:block mx-2"></div>
+
+                <div class="flex flex-col w-full sm:w-auto">
+                    <label class="text-[10px] text-kb-muted font-mono mb-1 text-right">적용 환율 (₩/$)</label>
+                    <input id="fxRate" type="text" inputmode="decimal" value="1,400" class="w-full sm:w-24 bg-transparent border-b border-gray-600 focus:border-kb-yellow text-kb-yellow font-mono text-lg pb-1 outline-none text-right transition-colors">
+                </div>
+            </div>
+        </div>
+
+        <!-- 컨트롤 패널 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <!-- 월 납입금액 -->
+            <div class="bg-kb-panel border border-kb-border rounded-2xl p-6 shadow-lg relative overflow-hidden group hover:border-kb-yellow/50 transition-colors">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-kb-yellow/5 rounded-bl-full -z-10 group-hover:bg-kb-yellow/10 transition-colors"></div>
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-sm font-medium text-gray-300">월 납입금액</span>
+                    <div class="text-right">
+                        <span class="font-mono text-3xl font-bold text-kb-yellow" id="premLabel">$1,000</span>
+                        <span class="text-xs text-kb-muted font-mono ml-1">/월</span>
+                    </div>
+                </div>
+                <input type="range" id="premRange" min="300" max="5000" step="50" value="1000">
+                <div class="flex justify-between font-mono text-xs text-kb-muted mt-1">
+                    <span>$300</span>
+                    <span>$5,000</span>
+                </div>
+            </div>
+
+            <!-- 수익률 -->
+            <div class="bg-kb-panel border border-kb-border rounded-2xl p-6 shadow-lg relative overflow-hidden group hover:border-kb-yellow/50 transition-colors">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-kb-yellow/5 rounded-bl-full -z-10 group-hover:bg-kb-yellow/10 transition-colors"></div>
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-sm font-medium text-gray-300">가정 수익률 <span class="text-xs text-kb-muted">(연, 세전)</span></span>
+                    <span class="font-mono text-3xl font-bold text-kb-yellow" id="rateLabel">9.0%</span>
+                </div>
+                <input type="range" id="rateRange" min="7" max="15" step="0.5" value="9">
+                <div class="flex justify-between font-mono text-xs text-kb-muted mt-1">
+                    <span>7%</span>
+                    <span>15%</span>
+                </div>
+            </div>
+
+            <!-- 사업비 안내 (Full width) -->
+            <div class="md:col-span-2 bg-kb-dark border border-kb-border rounded-xl p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <div class="w-12 h-12 rounded-full bg-kb-panel flex items-center justify-center flex-shrink-0 border border-kb-border">
+                    <i class="fa-solid fa-circle-info text-kb-muted text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-gray-200 mb-1 flex items-center gap-2">
+                        사업비 고정값 <span class="text-kb-yellow font-mono bg-kb-yellow/10 px-2 py-0.5 rounded text-xs">8.0%</span>
+                    </h3>
+                    <p class="text-xs text-kb-muted leading-relaxed">
+                        가입금액의 8%를 제한 나머지 <b>92%</b>가 투자됩니다. <br class="hidden sm:block">
+                        납입기간은 <b>10년 고정</b>이며, 이후에는 추가 납입 없이 복리로 성장한다고 가정합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 결과 타이틀 -->
+        <div class="flex flex-col sm:flex-row items-baseline justify-between mb-5 border-b border-kb-border pb-3">
+            <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie text-kb-yellow"></i> 예상 적립금 추이 & 세금 혜택
+            </h2>
+            <div class="font-mono text-xs text-kb-muted mt-2 sm:mt-0 bg-kb-panel px-3 py-1 rounded-full border border-kb-border" id="assumpLine"></div>
+        </div>
+
+        <!-- 결과 카드 (Horizons) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="horizons">
+            <!-- JS로 동적 생성됨 -->
+        </div>
+
+        <!-- 강력한 CTA 배너 -->
+        <div class="mt-16 bg-gradient-to-r from-[#202020] to-kb-black border border-kb-yellow/30 rounded-3xl p-8 md:p-12 text-center shadow-[0_10px_40px_rgba(255,204,0,0.1)] relative overflow-hidden group">
+            <!-- 장식용 배경 요소 -->
+            <div class="absolute -right-20 -top-20 w-64 h-64 bg-kb-yellow rounded-full opacity-5 group-hover:scale-150 transition-transform duration-1000"></div>
+            <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-kb-gold rounded-full opacity-5 group-hover:scale-150 transition-transform duration-1000"></div>
+            
+            <div class="relative z-10">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-kb-yellow/10 mb-4 border border-kb-yellow/20 text-kb-yellow text-2xl">
+                    <i class="fa-solid fa-handshake-angle"></i>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-black text-white mb-3">완벽한 노후 플랜, <span class="text-kb-yellow">전문가와 함께 완성하세요</span></h2>
+                <p class="text-gray-400 mb-8 max-w-2xl mx-auto text-sm md:text-base">
+                    현재 시뮬레이션 된 수익률을 달성하기 위한 구체적인 펀드 포트폴리오 전략과<br class="hidden md:block">
+                    고객님의 세금, 상속/증여 플랜까지 아우르는 1:1 맞춤형 컨설팅을 제공합니다.
+                </p>
+                
+                <a href="https://booking.allbaro.workers.dev/" target="_blank" class="pulse-btn inline-flex items-center gap-3 bg-kb-yellow text-kb-black font-black text-lg px-10 py-4 rounded-full hover:bg-white transition-all transform hover:-translate-y-1 shadow-lg">
+                    <span>VIP 심층 상담 예약하기</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 푸터 -->
+        <footer class="mt-12 text-[11px] text-kb-muted leading-relaxed border-t border-kb-border pt-6 text-center sm:text-left">
+            <p>※ 본 시뮬레이터는 상담 참고용 추정치이며, 실제 해지환급금 및 적립금은 특별계정운용보수(연 0.6%대), 위험보험료 변동, 펀드 실제 수익률, 최저사망보증비용 등에 따라 달라질 수 있습니다.</p>
+            <p class="mt-1">※ 고객 제안 시에는 반드시 공식 가입설계서 수치로 확인 및 대조하시기 바랍니다. 원금은 10년간 납입한 총 보험료(사업비 차감 전) 기준입니다.</p>
+            <p class="mt-4 font-mono text-[10px]">&copy; 2026 KB Wealth Management Simulator.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // 유틸리티 함수
+        const fmtUsd = n => '$' + Math.round(n).toLocaleString('en-US');
+        const fmtKrw = n => '₩' + Math.round(n).toLocaleString('ko-KR');
+        const parseNum = s => parseFloat(String(s).replace(/[^0-9.\-]/g,'')) || 0;
+
+        // ---------- 환율 설정 (FX bar) ----------
+        const fxUsd = document.getElementById('fxUsd');
+        const fxKrw = document.getElementById('fxKrw');
+        const fxRate = document.getElementById('fxRate');
+
+        function syncFromUsd(){
+            const usd = parseNum(fxUsd.value);
+            const rate = parseNum(fxRate.value);
+            fxKrw.value = Math.round(usd*rate).toLocaleString('ko-KR');
+            render();
+        }
+        function syncFromKrw(){
+            const krw = parseNum(fxKrw.value);
+            const rate = parseNum(fxRate.value) || 1;
+            fxUsd.value = (krw/rate).toLocaleString('en-US',{maximumFractionDigits:2});
+        }
+        function syncFromRate(){
+            syncFromUsd();
+        }
+        
+        fxUsd.addEventListener('input', syncFromUsd);
+        fxKrw.addEventListener('input', syncFromKrw);
+        fxRate.addEventListener('input', syncFromRate);
+
+        function getRate(){ return parseNum(fxRate.value) || 1400; }
+
+        // ---------- 핵심 계산 로직 ----------
+        const FEE_RATE = 0.08; // 사업비 고정 (8%)
+
+        const premRange = document.getElementById('premRange');
+        const rateRange = document.getElementById('rateRange');
+        const premLabel = document.getElementById('premLabel');
+        const rateLabel = document.getElementById('rateLabel');
+        const assumpLine = document.getElementById('assumpLine');
+        const horizonsEl = document.getElementById('horizons');
+
+        // 기본 조회 기간 설정 (10년, 15년, 20년)
+        let horizonYears = [10, 15, 20];
+
+        // 결과 카드 HTML 생성
+        function buildHorizonCards(){
+            horizonsEl.innerHTML = horizonYears.map((y, i) => `
+            <div class="bg-kb-panel border border-kb-border rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(255,204,0,0.08)] hover:border-kb-yellow/30 flex flex-col h-full">
+                <!-- 상단 장식 바 -->
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-kb-yellow to-kb-gold opacity-80"></div>
+                
+                <div class="flex items-center justify-between mb-6 pt-2">
+                    <div class="flex items-end gap-1">
+                        <input type="number" min="10" max="60" value="${y}" class="yr-input w-12 bg-transparent border-b border-kb-border focus:border-kb-yellow text-white font-mono text-2xl font-bold text-center outline-none transition-colors" data-idx="${i}">
+                        <span class="text-kb-muted text-sm font-medium mb-1">년 뒤</span>
+                    </div>
+                    <div class="bg-kb-yellow/10 border border-kb-yellow/30 text-kb-yellow font-mono text-xs font-bold px-3 py-1 rounded-full shadow-[0_0_10px_rgba(255,204,0,0.1)]" id="pct-${i}">
+                        +0%
+                    </div>
+                </div>
+                
+                <div class="mb-8 flex-grow">
+                    <div class="font-mono text-4xl font-black text-white tracking-tighter" id="usd-${i}">$0</div>
+                    <div class="font-mono text-sm text-kb-muted mt-1" id="krw-${i}">₩0</div>
+                </div>
+                
+                <!-- 비주얼 렛저(막대 그래프) -->
+                <div>
+                    <div class="flex h-2.5 rounded-full overflow-hidden bg-kb-black mb-3">
+                        <div class="ledger-segment bg-gray-500" id="seg-p-${i}" style="width:33%"></div>
+                        <div class="ledger-segment bg-kb-danger" id="seg-f-${i}" style="width:33%"></div>
+                        <div class="ledger-segment bg-kb-yellow" id="seg-g-${i}" style="width:34%"></div>
+                    </div>
+                    
+                    <div class="space-y-2 font-mono text-xs">
+                        <div class="flex justify-between items-center text-gray-300">
+                            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-gray-500"></span> 원금</span>
+                            <div class="text-right">
+                                <span id="leg-p-${i}">$0</span>
+                                <span class="block text-[9px] text-gray-500" id="leg-p-krw-${i}">₩0</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-gray-300">
+                            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-kb-danger"></span> 사업비</span>
+                            <div class="text-right">
+                                <span id="leg-f-${i}">$0</span>
+                                <span class="block text-[9px] text-gray-500" id="leg-f-krw-${i}">₩0</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center font-bold text-kb-yellow">
+                            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-kb-yellow shadow-[0_0_5px_#FFCC00]"></span> 운용수익</span>
+                            <div class="text-right">
+                                <span id="leg-g-${i}">$0</span>
+                                <span class="block text-[9px] text-kb-yellow/60" id="leg-g-krw-${i}">₩0</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 추가된 해외주식 양도세(22%) 비교 영역 -->
+                        <div class="mt-3 pt-3 border-t border-kb-border/60">
+                            <div class="flex justify-between items-center text-[11px] text-gray-400 font-sans">
+                                <span class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-scale-unbalanced text-gray-500"></i> 해외주식(22%) 가정 시 세금
+                                </span>
+                                <div class="text-right">
+                                    <span class="text-kb-danger font-bold font-mono" id="tax-usd-${i}">-$0</span>
+                                    <span class="block text-[9px] font-mono text-kb-danger/60" id="tax-krw-${i}">-₩0</span>
+                                </div>
+                            </div>
+                            <div class="text-[9px] text-gray-500 mt-1 text-right font-sans">(연 250만 원 기본공제 적용)</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            `).join('');
+
+            // 년도 변경 이벤트 리스너
+            document.querySelectorAll('.yr-input').forEach(inp=>{
+                inp.addEventListener('change', e=>{
+                    const idx = +e.target.dataset.idx;
+                    let v = parseInt(e.target.value)||10;
+                    if(v < 10) v = 10;
+                    horizonYears[idx] = v;
+                    e.target.value = v;
+                    render();
+                });
+            });
+        }
+
+        // 재무 계산 함수
+        function calc(){
+            const premium = parseNum(premRange.value);
+            const annualRate = parseNum(rateRange.value)/100;
+            const feeRate = FEE_RATE;
+            const rm = Math.pow(1+annualRate, 1/12) - 1;
+            const netMonthly = premium * (1 - feeRate);
+            const payMonths = 120; // 10년 납 고정
+
+            // 120개월 납입 완료 시점의 미래 가치 (FV of ordinary annuity)
+            const fv120 = rm === 0 ? netMonthly*payMonths : netMonthly * ((Math.pow(1+rm,payMonths)-1)/rm);
+
+            const principalTotal = premium * payMonths; // 총 원금
+            const feeTotal = premium * feeRate * payMonths; // 총 사업비
+
+            return horizonYears.map(y=>{
+                const months = y*12;
+                const monthsAfter = Math.max(0, months - payMonths);
+                // 10년 이후에는 추가 납입 없이 거치식 복리 성장
+                const fv = fv120 * Math.pow(1+rm, monthsAfter); 
+                const growth = fv - (principalTotal - feeTotal);
+                const pct = principalTotal>0 ? (fv/principalTotal - 1)*100 : 0;
+                return {y, fv, principalTotal, feeTotal, growth, pct};
+            });
+        }
+
+        // 화면 업데이트
+        function render(){
+            premLabel.innerHTML = fmtUsd(premRange.value);
+            rateLabel.textContent = parseFloat(rateRange.value).toFixed(1) + '%';
+
+            const rate = getRate();
+            assumpLine.innerHTML = `수익률 <span class="text-white">${parseFloat(rateRange.value).toFixed(1)}%</span> · 사업비 <span class="text-white">${(FEE_RATE*100).toFixed(2)}%</span> · 환율 <span class="text-white">₩${rate.toLocaleString('ko-KR')}/$</span>`;
+
+            const results = calc();
+            results.forEach((r,i)=>{
+                const usdEl = document.getElementById('usd-'+i);
+                if(!usdEl) return;
+
+                usdEl.textContent = fmtUsd(r.fv);
+                document.getElementById('krw-'+i).textContent = fmtKrw(r.fv*rate);
+                
+                const pctEl = document.getElementById('pct-'+i);
+                pctEl.textContent = (r.pct>=0?'+':'') + r.pct.toFixed(0) + '%';
+                // 수익률이 높으면 빛나는 효과
+                if(r.pct > 100) {
+                    pctEl.className = "bg-kb-yellow text-kb-black font-mono text-xs font-bold px-3 py-1 rounded-full shadow-[0_0_15px_rgba(255,204,0,0.6)]";
+                } else {
+                    pctEl.className = "bg-kb-yellow/10 border border-kb-yellow/30 text-kb-yellow font-mono text-xs font-bold px-3 py-1 rounded-full shadow-[0_0_10px_rgba(255,204,0,0.1)]";
+                }
+
+                // 렛저 바 비율 계산
+                const total = Math.max(r.principalTotal, r.fv + r.feeTotal, 1);
+                const pPct = Math.max(2, (r.principalTotal - r.feeTotal) / total * 100);
+                const fPct = Math.max(2, r.feeTotal / total * 100);
+                const gPct = Math.max(0, 100 - pPct - fPct);
+
+                document.getElementById('seg-p-'+i).style.width = pPct+'%';
+                document.getElementById('seg-f-'+i).style.width = fPct+'%';
+                document.getElementById('seg-g-'+i).style.width = gPct+'%';
+
+                // 하단 수치 텍스트 업데이트
+                const netPrincipal = r.principalTotal - r.feeTotal;
+                document.getElementById('leg-p-'+i).textContent = fmtUsd(netPrincipal);
+                document.getElementById('leg-f-'+i).textContent = fmtUsd(r.feeTotal);
+                
+                const growthVal = Math.max(0, r.growth);
+                document.getElementById('leg-g-'+i).textContent = fmtUsd(growthVal);
+
+                document.getElementById('leg-p-krw-'+i).textContent = fmtKrw(netPrincipal*rate);
+                document.getElementById('leg-f-krw-'+i).textContent = fmtKrw(r.feeTotal*rate);
+                document.getElementById('leg-g-krw-'+i).textContent = fmtKrw(growthVal*rate);
+                
+                // 해외주식 양도세(22%) 계산 (원화 기준 250만원 공제 후 계산하여 달러로 역산)
+                const profitKrw = growthVal * rate;
+                const taxableProfitKrw = Math.max(0, profitKrw - 2500000); // 250만 원 기본공제
+                const taxKrw = taxableProfitKrw * 0.22;
+                const taxUsd = taxKrw / rate;
+                
+                document.getElementById('tax-usd-'+i).textContent = '-' + fmtUsd(taxUsd);
+                document.getElementById('tax-krw-'+i).textContent = '-' + fmtKrw(taxKrw);
+            });
+        }
+
+        // 이벤트 리스너 등록
+        premRange.addEventListener('input', render);
+        rateRange.addEventListener('input', render);
+
+        // 초기화
+        buildHorizonCards();
+        render();
+    </script>
+</body>
+</html>
